@@ -1,0 +1,66 @@
+# Builds Rust→WASM and the Vite app, then publishes web/dist to GitHub Pages.
+#
+# After pushing: Repository → Settings → Pages → Build and deployment → Source: GitHub Actions.
+#
+# Default BASE_PATH is /repo-name/ (project pages). For a user site (username.github.io repo)
+# or a custom domain at the site root, add a repository variable PAGES_BASE_PATH set to /
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: wasm
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci && npm ci --prefix web
+
+      - name: Build (WASM + Vite)
+        run: npm run build
+        env:
+          BASE_PATH: ${{ vars.PAGES_BASE_PATH != '' && vars.PAGES_BASE_PATH || format('/{0}/', github.event.repository.name) }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

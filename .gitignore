@@ -1,0 +1,33 @@
+# Node
+node_modules/
+web/node_modules/
+
+# Vite / frontend build
+web/dist/
+
+# Rust / wasm
+wasm/target/
+**/*.rs.bk
+
+# Logs & local env
+*.log
+npm-debug.log*
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.idea/
+*.swp
+*~
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional tooling
+coverage/
+.eslintcache
