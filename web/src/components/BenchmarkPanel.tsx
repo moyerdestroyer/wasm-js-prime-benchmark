@@ -154,7 +154,9 @@ const BenchmarkPanel: React.FC<BenchmarkPanelProps> = ({
                     </header>
                     <p className="lane-time">{formatMs(jsDisplayMs)}</p>
                     <p className="lane-meta">{jsStatusText}</p>
-                    {results?.jsPrimeCount != null && <p className="lane-detail">Primes found: {results.jsPrimeCount.toLocaleString()}</p>}
+                    {!isRunning && results?.jsPrimeCount != null && (
+                        <p className="lane-detail">Primes found: {results.jsPrimeCount.toLocaleString()}</p>
+                    )}
                     {results?.jsErrorMessage && <p className="lane-detail">Error: {results.jsErrorMessage}</p>}
                 </article>
 
@@ -165,10 +167,11 @@ const BenchmarkPanel: React.FC<BenchmarkPanelProps> = ({
                     </header>
                     <p className="lane-time">{formatMs(wasmDisplayMs)}</p>
                     <p className="lane-meta">{wasmStatusText}</p>
-                    {results && (
-                        <p className="lane-detail">
-                            {results.wasmPrimeCount === null ? 'Prime count unavailable' : `Primes found: ${results.wasmPrimeCount.toLocaleString()}`}
-                        </p>
+                    {!isRunning && results && results.wasmPrimeCount != null && (
+                        <p className="lane-detail">Primes found: {results.wasmPrimeCount.toLocaleString()}</p>
+                    )}
+                    {!isRunning && results && results.wasmPrimeCount === null && (wasmStatus === 'unavailable' || wasmStatus === 'error') && (
+                        <p className="lane-detail">Prime count unavailable</p>
                     )}
                 </article>
             </div>
